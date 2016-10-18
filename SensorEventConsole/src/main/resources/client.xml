@@ -20,11 +20,11 @@
         <region-attributes refid="PROXY">
         </region-attributes>
     </region>
-    
+
     <region name="Transaction">
         <region-attributes refid="PROXY">
             <cache-listener>
-                <class-name>io.pivotal.demo.sko.TransactionListener</class-name>
+                <class-name>io.pivotal.demo.sko.SensorEventListener</class-name>
             </cache-listener>
         </region-attributes>
     </region>
@@ -32,9 +32,9 @@
     <region name="Suspect">
         <region-attributes refid="PROXY">
             <cache-listener>
-                <class-name>io.pivotal.demo.sko.SuspectTransactionListener</class-name>
+                <class-name>io.pivotal.demo.sko.RiskEventListener</class-name>
             </cache-listener>
         </region-attributes>
     </region>
-    
+
 </client-cache>

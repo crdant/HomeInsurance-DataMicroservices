@@ -12,21 +12,23 @@ public class SensorEventsMap implements Serializable{
 	public static SensorEventsMap riskEvents= new SensorEventsMap();
 
 	//thread-safe
-	private List<MappedTransaction> sensorEvents = new Vector<MappedTransaction>();
+	private List<MappedSensorEvent> sensorEvents = new Vector<MappedSensorEvent>();
 
-	public SensorEventsMap(){}
+	public SensorEventsMap() {
 
-	public SensorEventsMap(Collection<MappedTransaction> t){
+	}
+
+	public SensorEventsMap(Collection<MappedSensorEvent> t){
 		sensorEvents.addAll(t);
 	}
 
-	public Collection<MappedTransaction> getSensorEvents() {
+	public Collection<MappedSensorEvent> getSensorEvents() {
 		return sensorEvents;
 	}
 
 
 	public void addSensorEvent(long id, double value, String location, boolean risk, long timestamp){
-		sensorEvents.add(new MappedTransaction(id, value, location, risk, timestamp));
+		sensorEvents.add(new MappedSensorEvent(id, value, location, risk, timestamp));
 	}
 
 	public void clearAll(){
@@ -34,16 +36,14 @@ public class SensorEventsMap implements Serializable{
 	}
 
 
-	public void addSensorEvent(MappedTransaction t) {
+	public void addSensorEvent(MappedSensorEvent t) {
 		sensorEvents.add(t);
 
 	}
 
 	public void addSensorEvent(long id, double value,
-			String location, long timestamp) {
+	String location, long timestamp) {
 		addSensorEvent(id, value, location, false, timestamp);
 	}
-
-
 
 }

@@ -28,9 +28,6 @@ public class SensorEventListener extends CacheListenerAdapter
 		sensorEventArrived(event);
 	}
 
-
-
-
 	public void sensorEventArrived(EntryEvent e){
 
 		Object obj = e.getNewValue();

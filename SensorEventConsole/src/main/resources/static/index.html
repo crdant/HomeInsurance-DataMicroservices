@@ -227,14 +227,14 @@ d3.select(self.frameElement).style("height", height + "px");
     var updateData = function() {
 
     	d3.json( "controller/getSensorEventsMap", function(data) {
-    		var nodes = d3.range(data.transactions.length).map(function(i) {
+    		var nodes = d3.range(data.sensorEvents.length).map(function(i) {
     				return {
-    					id: data.transactions[i].id,
-    					name: data.transactions[i].location,
-    					radius: data.transactions[i].value,
-    					value: data.transactions[i].value,
-    					location: data.transactions[i].location,
-    					ts: data.transactions[i].timestamp
+    					id: data.sensorEvents[i].id,
+    					name: data.sensorEvents[i].location,
+    					radius: data.sensorEvents[i].value,
+    					value: data.sensorEvents[i].value,
+    					location: data.sensorEvents[i].location,
+    					ts: data.sensorEvents[i].timestamp
     				};
     		});
 
@@ -256,14 +256,14 @@ d3.select(self.frameElement).style("height", height + "px");
 
 
         d3.json( "controller/getRiskEventsMap", function(data) {
-	        		var nodes = d3.range(data.transactions.length).map(function(i) {
+	        		var nodes = d3.range(data.sensorEvents.length).map(function(i) {
 	        				return {
-	        					name: data.transactions[i].location,
-	        					radius: data.transactions[i].value,
-	        					value: data.transactions[i].value,
-	        					location: data.transactions[i].location,
-	        					ts: data.transactions[i].timestamp,
-	        					reason: data.transactions[i].reason
+	        					name: data.sensorEvents[i].location,
+	        					radius: data.sensorEvents[i].value,
+	        					value: data.sensorEvents[i].value,
+	        					location: data.sensorEvents[i].location,
+	        					ts: data.sensorEvents[i].timestamp,
+	        					reason: data.sensorEvents[i].reason
 	        				};
 	        		});
 
@@ -288,7 +288,7 @@ d3.select(self.frameElement).style("height", height + "px");
             		row.append("td").style({width: "50%"})
     		           	 .text(function(d) {return node.location.substring(0,26)});
             		row.append("td").style({width: "25%"})
-		       		   	 .text(function(d) {return "$ "+node.value.toFixed(2)});
+		       		   	 .text(function(d) {return " "+node.value.toFixed(2)});
             		row.append("td").style({width: "25%"})
        				   	 .text(function(d) {return " " });
 

@@ -2,15 +2,15 @@ package io.pivotal.demo.sko.util;
 
 import java.io.Serializable;
 
-public class MappedTransaction implements Serializable{
+public class MappedSensorEvent implements Serializable{
 
 	private long id;
 	private double value;
 	private long timestamp;
 	private String location;
 	private boolean suspect;
-	
-	public MappedTransaction(long id, double value, String location, boolean suspect, 
+
+	public MappedSensorEvent(long id, double value, String location, boolean suspect,
 			long timestamp) {
 		this.id = id;
 		this.value = value;
@@ -49,6 +49,6 @@ public class MappedTransaction implements Serializable{
 	public void setSuspect(boolean suspect) {
 		this.suspect = suspect;
 	}
-	
-	
+
+
 }
