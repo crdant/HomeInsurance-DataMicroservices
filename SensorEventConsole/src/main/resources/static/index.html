@@ -52,7 +52,7 @@ body, html{
     border: 2px solid;
 }
 
-  
+
 
 </style>
 <link rel="stylesheet" type="text/css" href="css/headerfooter.css">
@@ -64,37 +64,37 @@ body, html{
     <div class="container">
     	<div class="nav-bar">
 	        <div class="logo">
-				<img src="img/pivotal-logo.png" width="200" height="45" align="top">   	           
+				<img src="img/pivotal-logo.png" width="200" height="45" align="top">
    	        </div>
 	        <br>
 	        <div class="nav" >
-   	            
-	        	Anti-Fraud Real Time Dashboard
+
+	        	In-Home Sensor Real Time Dashboard
 
 	        </div>
 	    </div>
 	</div>
 
 	<div id="maincontent" style="overflow-y: scroll;">
-		<div align="center"> 
+		<div align="center">
 			<div class="banner" >
-				Transactions per PoS / US County
+				Sensor Events per Consumer / US County
 			</div>
 		</div>
-		
+
 		<div>
 	  		<div id="map" class="usmap"></div>
-	  		
+
 	  		<div id="messages" class="messages">
 	            <table>
 	            </table>
-	            
+
 	            <div id="scrollable" style="width: 100%">
 		            <table class="scroll-table">
 	            	<thead id="table_header">
 	            		<tr>
 	            			<th colspan="3" style="text-align: center; width: 237px; font-size: 15px; padding-top: 10px; padding-bottom: 10px">
-	            				Suspect Transactions
+	            				Detected Risks
 	            			</th>
 	            		</tr>
 	            		<tr style="width: 100%">
@@ -102,27 +102,27 @@ body, html{
 	            			<th style="text-align: left; width: 30%">Value</th>
 	            			<th style="text-align: left; width: 20%"> </th>
 	            		</tr>
-	            	</thead>	            		                
+	            	</thead>
 		                <tbody id="possible_fraud">
 		                </tbody>
 		            </table>
 	             </div>
 			</div>
 		</div>
-	</div>  		
-	
+	</div>
+
     <div class="container">
         <div class="footer">
           <div class="footer-text">©&nbsp;2015 Pivotal Software, Inc.  </div>
 
-          <div class="footer-poweredby" > 
+          <div class="footer-poweredby" >
 	          	<img src="img/p-gemfire.png" width=180 height=54 >
-	          	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-          		<img src="img/p-greenplum.png" width=180 height=54 > 
-          </div>  
-          
+	          	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          		<img src="img/p-greenplum.png" width=180 height=54 >
+          </div>
+
 	    </div>
-	</div>  		
+	</div>
 
 
 
@@ -172,11 +172,11 @@ legend.append("text")
 d3.json("us.json", function(error, us) {
   if (error) throw error;
 
- 
+
   // create the path
   //var path = d3.geo.path().projection(projection);
-  
-  
+
+
   svg.append("path")
       .datum(topojson.feature(us, us.objects.nation))
       .attr("class", "land")
@@ -194,10 +194,10 @@ d3.json("us.json", function(error, us) {
 		.enter().append("circle")
   		.attr("transform", function(d) { return "translate(" + path.centroid(d) + ")"; })
   		.attr("r", 1.5)
-  		.attr("class", function(d) { return d.properties.name; }); 
-  
+  		.attr("class", function(d) { return d.properties.name; });
 
-  
+
+
   /*
   svg.append("g")
       .attr("class", "bubble")
@@ -218,26 +218,26 @@ d3.json("us.json", function(error, us) {
 d3.select(self.frameElement).style("height", height + "px");
 
 
-/* 
- * 
+/*
+ *
  */
 
 
 
     var updateData = function() {
 
-    	d3.json( "controller/getTransactionsMap", function(data) {
-    		var nodes = d3.range(data.transactions.length).map(function(i) { 
+    	d3.json( "controller/getSensorEventsMap", function(data) {
+    		var nodes = d3.range(data.transactions.length).map(function(i) {
     				return {
     					id: data.transactions[i].id,
     					name: data.transactions[i].location,
     					radius: data.transactions[i].value,
     					value: data.transactions[i].value,
     					location: data.transactions[i].location,
-    					ts: data.transactions[i].timestamp    					
+    					ts: data.transactions[i].timestamp
     				};
     		});
-    		  
+
     		nodes.forEach(function(node){
         		svg.select("#"+node.name.split('. ').join('.').split(' ').join('.'))
     	 	    .attr("transform", function(d) { return "translate(" + path.centroid(d) + ")"; })
@@ -245,18 +245,18 @@ d3.select(self.frameElement).style("height", height + "px");
     			//.duration(2000)
     			.attr("r", function(d) { return radius(node.radius); })
         		.transition()
-        		.attr("r", function(d) { return radius(1.5)}); 	
+        		.attr("r", function(d) { return radius(1.5)});
         	});
-        	
 
-    		
+
+
 
     	});
 
-    		
 
-        d3.json( "controller/getSuspiciousTransactionsMap", function(data) {
-	        		var nodes = d3.range(data.transactions.length).map(function(i) { 
+
+        d3.json( "controller/getRiskEventsMap", function(data) {
+	        		var nodes = d3.range(data.transactions.length).map(function(i) {
 	        				return {
 	        					name: data.transactions[i].location,
 	        					radius: data.transactions[i].value,
@@ -266,7 +266,7 @@ d3.select(self.frameElement).style("height", height + "px");
 	        					reason: data.transactions[i].reason
 	        				};
 	        		});
-        		  
+
         		nodes.forEach(function(node){
             		svg.select("#"+node.name.split('. ').join('.').split(' ').join('.'))
         	 	    .attr("transform", function(d) { return "translate(" + path.centroid(d) + ")"; })
@@ -276,37 +276,37 @@ d3.select(self.frameElement).style("height", height + "px");
             		.transition()
         			.duration(1000)  // find out how to make it blink
             		.attr("r", function(d) { return radius(1.5); });
-        			
-        		});   
+
+        		});
 
         		nodes.forEach(function(node){
 
             		tbody = d3.select("#possible_fraud");
-    		    		
+
             		row = tbody.insert("tr",":first-child").attr("width", "100%");
-            		
+
             		row.append("td").style({width: "50%"})
     		           	 .text(function(d) {return node.location.substring(0,26)});
             		row.append("td").style({width: "25%"})
 		       		   	 .text(function(d) {return "$ "+node.value.toFixed(2)});
             		row.append("td").style({width: "25%"})
        				   	 .text(function(d) {return " " });
-        				
-        		});  		
-                   			
-        		
-        	 
-    		
+
+        		});
+
+
+
+
     	});
-            		
-    		
+
+
     		/*
-    		selectedNodes = 
+    		selectedNodes =
     			svg.append("g")
     	    	//.attr("class", "bubble")
     	  		.selectAll("circle");
     	  		//.data(nodes, function(d) { d.name; });
-    		
+
     		svg.append("g")
     	    	.attr("class", "bubble")
     	  		.selectAll("circle")
@@ -320,22 +320,22 @@ d3.select(self.frameElement).style("height", height + "px");
     			//.duration(2000)
     			//.attr("r", function(d) { return radius(d.radius); });
 
-    		
+
     		*/
     		/*
     		dataNodes = nodes;
 
-    	      		    		
+
     		var existingNodes = container.selectAll('circle');
-    		
+
     		var vis = container.selectAll('circle').data(dataNodes, function(d) { return d.name; });
-    		
-    		
+
+
     		// enter
-    		
+
     		container.selectAll('circle').data(dataNodes, function(d) { return d.name; })
     		  .remove();
-    		
+
     		container.selectAll('circle').data(dataNodes, function(d) { return d.name; })
     		  .enter()
     		  .append('circle')
@@ -343,7 +343,7 @@ d3.select(self.frameElement).style("height", height + "px");
     		  .attr("cx", function(d) { return d.x; })
     		  .attr("cy", function(d) { return d.y; })
     		  .style("fill", function(d, i) {
-    			  return color(i % 3); 
+    			  return color(i % 3);
     			})
     		  .attr('transform', function(d) { return 'translate(' + d.x + ',' + d.y + ')'; })
     		  .style('opacity', 1)
@@ -351,27 +351,27 @@ d3.select(self.frameElement).style("height", height + "px");
     			  if (selectedDevice==null || selectedDevice=='undefined') return 'visible';
     			  return selectedDevice==d.name? 'visible' : 'hidden';
                 });
-    		
-    	      $('svg circle').tipsy({ 
+
+    	      $('svg circle').tipsy({
     	          gravity: 'w',
     	          fade: true,
-    	          html: true, 
+    	          html: true,
     	          title: function() {
     	            var d = this.__data__;
-    	            return '<span> Device ID: ' + d.name + '</span>'; 
+    	            return '<span> Device ID: ' + d.name + '</span>';
     	          }
     	        });
     		*/
-    	
 
-        
-    	
+
+
+
         setTimeout(updateData, 1000);
 	};
-	
-    
-    
-	
-	
+
+
+
+
+
 
 </script>
