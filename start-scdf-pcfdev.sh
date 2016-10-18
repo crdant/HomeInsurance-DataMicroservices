@@ -1,5 +1,4 @@
-SCDF_BUILD_PATH=/Users/fmelo/scdf
-
+SCDF_BUILD_PATH=/Users/crdant/Source/spring-cloud-dataflow
 
 export SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL=http://api.local.pcfdev.io
 export SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG=pcfdev-org
@@ -15,4 +14,4 @@ export SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_BUILDPACK=java_buildpack
 export SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ENABLE_RANDOM_APP_NAME_PREFIX=false
 export MAVEN_OFFLINE=true
 
-java -jar $SCDF_BUILD_PATH/spring-cloud-dataflow-server-cloudfoundry-1.0.0.BUILD-SNAPSHOT.jar
+java -jar $SCDF_BUILD_PATH/spring-cloud-dataflow-server-cloudfoundry-1.0.1.RELEASE.jar
