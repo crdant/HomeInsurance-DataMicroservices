@@ -28,8 +28,22 @@
   stroke-width: .5px;
 }
 
-.fraud {
+.severe {
   fill: red;
+  fill-opacity: .5;
+  stroke: #fff;
+  stroke-width: .5px;
+}
+
+.moderate {
+  fill: orange;
+  fill-opacity: .5;
+  stroke: #fff;
+  stroke-width: .5px;
+}
+
+.mild {
+  fill: yellow;
   fill-opacity: .5;
   stroke: #fff;
   stroke-width: .5px;
@@ -99,8 +113,8 @@ body, html{
 	            		</tr>
 	            		<tr style="width: 100%">
 	            			<th style="text-align: left; width: 50%">Location</th>
-	            			<th style="text-align: left; width: 30%">Value</th>
-	            			<th style="text-align: left; width: 20%"> </th>
+	            			<th style="text-align: left; width: 30%">Type</th>
+	            			<th style="text-align: left; width: 20%">Severity</th>
 	            		</tr>
 	            	</thead>
 		                <tbody id="possible_fraud">
@@ -225,6 +239,8 @@ d3.select(self.frameElement).style("height", height + "px");
 
 
     var updateData = function() {
+			var riskTypes =[ "Thermostat", "Power", "CO Detector", "Smoke Detector"];
+			var levelColors =[ "yellow", "orange", "red"];
 
     	d3.json( "controller/getSensorEventsMap", function(data) {
     		var nodes = d3.range(data.sensorEvents.length).map(function(i) {
@@ -253,26 +269,31 @@ d3.select(self.frameElement).style("height", height + "px");
 
     	});
 
-
-
         d3.json( "controller/getRiskEventsMap", function(data) {
 	        		var nodes = d3.range(data.sensorEvents.length).map(function(i) {
+								var sev = "mild"
+								if (data.sensorEvents[i].value >= 100 ) {
+									sev = "severe"
+								} else if ( data.sensorEvents[i].value >= 50 ) {
+									sev = "moderate"
+								}
 	        				return {
 	        					name: data.sensorEvents[i].location,
 	        					radius: data.sensorEvents[i].value,
-	        					value: data.sensorEvents[i].value,
 	        					location: data.sensorEvents[i].location,
 	        					ts: data.sensorEvents[i].timestamp,
-	        					reason: data.sensorEvents[i].reason
+	        					reason: data.sensorEvents[i].reason,
+										severity: sev
 	        				};
 	        		});
 
         		nodes.forEach(function(node){
+
             		svg.select("#"+node.name.split('. ').join('.').split(' ').join('.'))
         	 	    .attr("transform", function(d) { return "translate(" + path.centroid(d) + ")"; })
     			    .transition()
         			.attr("r", function(d) { return radius(node.radius*3); })
-            		.attr("class", "fraud")
+            		.attr("class", node.severity)
             		.transition()
         			.duration(1000)  // find out how to make it blink
             		.attr("r", function(d) { return radius(1.5); });
@@ -280,7 +301,12 @@ d3.select(self.frameElement).style("height", height + "px");
         		});
 
         		nodes.forEach(function(node){
-
+							var severityColor = "yellow"
+							if (node.severity == "severe" ) {
+								severityColor = "red"
+							} else if ( node.severity == "moderate" ) {
+								severityColor = "orange"
+							}
             		tbody = d3.select("#possible_fraud");
 
             		row = tbody.insert("tr",":first-child").attr("width", "100%");
@@ -288,8 +314,8 @@ d3.select(self.frameElement).style("height", height + "px");
             		row.append("td").style({width: "50%"})
     		           	 .text(function(d) {return node.location.substring(0,26)});
             		row.append("td").style({width: "25%"})
-		       		   	 .text(function(d) {return " "+node.value.toFixed(2)});
-            		row.append("td").style({width: "25%"})
+		       		   	 .text(function(d) {return " "+riskTypes[Math.floor(Math.random() * riskTypes.length)]});
+            		row.append("td").style({width:"25%", "background-color": severityColor})
        				   	 .text(function(d) {return " " });
 
         		});
