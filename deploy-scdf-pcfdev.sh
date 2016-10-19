@@ -30,7 +30,7 @@ cf set-env dataflow-server SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATIO
 
 cf set-env dataflow-server SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_BUILDPACK java_buildpack
 cf set-env dataflow-server SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_STREAM_ENABLE_RANDOM_APP_NAME_PREFIX false
-cf set-env dataflow-server MAVEN_REMOTE_REPOSITORIES_REPO1_URL http://192.168.11.1:6840
+cf set-env dataflow-server MAVEN_REMOTE_REPOSITORIES_REPO1_URL http://host.pcfdev.io:6840
 cf set-env dataflow-server MAVEN_REMOTE_REPOSITORIES_REPO2_URL https://repo.spring.io/libs-snapshot
 
 

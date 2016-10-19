@@ -1,1 +1,1 @@
-cf cups gemfire -p '{"locatorHost":"192.168.11.1","locatorPort":"10334", "RestEndpoint":"http://192.168.11.1:8888/gemfire-api/v1/"}'
+cf cups gemfire -p '{"locatorHost":"host.pcfdev.io","locatorPort":"10334", "RestEndpoint":"http://host.pcfdev.io:8888/gemfire-api/v1/"}'

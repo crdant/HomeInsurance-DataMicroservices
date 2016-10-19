@@ -45,35 +45,35 @@ object ClusteringService {
 
   def HOME_LOCATION_WINDOW_SIZE = 25
   def TRAINSET_SIZE = 100000
-  def NUMBER_OF_ACCOUNTS = 100 
+  def NUMBER_OF_ACCOUNTS = 100
 
   def NUMBER_OF_CLUSTERS = 3 // Low Risk, Medium-Low, High Risk
-  
+
 
   val cloud = new CloudFactory().getCloud();
   val redisInfo = cloud.getServiceInfo("redis").asInstanceOf[RedisServiceInfo]
-  
-  
+
+
   val conf = new SparkConf().setMaster("local[*]")
                 .setAppName("FraudDetection")
                 .set("spark.eventLog.enabled", "false")
                 .set("redis.host", redisInfo.getHost)
                 .set("redis.port", redisInfo.getPort.toString())
                 .set("redis.auth", redisInfo.getPassword)
-  
-                
-                
+
+
+
   val sc = new SparkContext(conf);
-  
-    
-  
+
+
+
   val sqlContext = new SQLContext(sc)
-  
+
   val transactionsQuery = "(select distinct on (t.id) account_id, location, latitude, longitude, transaction_value, ts_millis, device_id, t.id as transaction_id from transaction t INNER JOIN pos_device p ON (t.device_id = p.id) INNER JOIN zip_codes z ON (trim(upper(regexp_replace(p.location, ' County', ''))) = upper(z.county || ', ' || z.name) ) where latitude IS NOT NULL and longitude IS NOT NULL and account_id<="+NUMBER_OF_ACCOUNTS+" order by t.id desc LIMIT "+TRAINSET_SIZE+") as transaction_info"
-  
-  
+
+
   val transactionsDF = sqlContext.read.format("jdbc").options(Map(
-          "url" -> getGpdbURL(),          
+          "url" -> getGpdbURL(),
           "driver" -> "org.postgresql.Driver",
           "dbtable" -> transactionsQuery,
           "partitionColumn" -> "account_id",
@@ -81,26 +81,26 @@ object ClusteringService {
           "upperBound" -> String.valueOf(NUMBER_OF_ACCOUNTS),
           "numPartitions" -> "1"))
           .load()
-         
-          
-          
+
+
+
   def getGpdbURL(): String= {
-    
+
     	val vcapServices = System.getenv("VCAP_SERVICES");
-    	if (vcapServices==null || vcapServices.isEmpty()) return "jdbc:postgresql://192.168.11.1:5432/gemfire?user=pivotal\u0026password=pivotal";
-    	    	
+    	if (vcapServices==null || vcapServices.isEmpty()) return "jdbc:postgresql://host.pcfdev.io:5432/gemfire?user=pivotal\u0026password=pivotal";
+
   		val parsed = JSON.parse(vcapServices).asInstanceOf[java.util.Map[String,Object]]
   		val userProvided = parsed.get("user-provided").asInstanceOf[Array[Object]];
   		val credentials = userProvided(0).asInstanceOf[java.util.Map[String,Object]].get("credentials").asInstanceOf[java.util.Map[String,Object]];
   		credentials.get("URL").toString();
-		    
+
   }
-          
+
   def loadHomeLocations(): DataFrame = {
-    
+
       val locationsQuery = "(select distinct on (account_id) account_id, location, count(location), latitude, longitude from transaction t INNER JOIN pos_device p ON (t.device_id = p.id) INNER JOIN (select latitude, longitude, county, name, count(zip) from zip_codes group by county, name, latitude, longitude) z ON (trim(upper(regexp_replace(p.location, ' County', ''))) = upper(z.county || ', ' || z.name) ) where account_id<="+NUMBER_OF_ACCOUNTS+" group by account_id, location, latitude, longitude order by account_id, count(location) desc, location ) as home_locations"
       // currently takes the location of the largest number of transactions as "home location"
-      
+
       val locations = sqlContext.read.format("jdbc").options(Map(
           "url" -> getGpdbURL(),
           "dbtable" -> locationsQuery,
@@ -108,17 +108,17 @@ object ClusteringService {
           "lowerBound" -> "0",
           "upperBound" -> String.valueOf(NUMBER_OF_ACCOUNTS),
           "numPartitions" -> "1"))
-          .load()          
-          
+          .load()
+
       locations.drop("count")
-      
-          
+
+
   }
-  
+
   def loadDeviceLocations(): DataFrame = {
-    
+
        val devicesQuery = "(select distinct on (id) id as device_id, location, latitude, longitude from pos_device p INNER JOIN (select latitude, longitude, county, name from zip_codes group by county, name, latitude, longitude) z ON (trim(upper(regexp_replace(p.location, ' County', ''))) = upper(z.county || ', ' || z.name) ) group by device_id, location, latitude, longitude order by device_id, location ) as device_locations"
-    
+
        sqlContext.read.format("jdbc").options(Map(
           "url" -> getGpdbURL(),
           "dbtable" -> devicesQuery,
@@ -126,73 +126,73 @@ object ClusteringService {
           "lowerBound" -> "0",
           "upperBound" -> "4000",
           "numPartitions" -> "1"))
-          .load()          
-          
-       
+          .load()
+
+
   }
-  
- 
+
+
   def train(): String = {
-    
+
     val transactions = transactionsDF.sort(desc("ts_millis")).limit(TRAINSET_SIZE).cache()
-    
+
     val deviceLocations = loadDeviceLocations()
-    
-    sc.toRedisKV(deviceLocations.map { x =>  
+
+    sc.toRedisKV(deviceLocations.map { x =>
          ("device::"+x.getLong(x.fieldIndex("device_id")), x.getDouble(x.fieldIndex("latitude"))+":"+x.getDouble(x.fieldIndex("longitude"))   )  // device_id x location
        })
-       
+
     val homeLocations = loadHomeLocations()
-    
-    val homeLocationsRowsMap = homeLocations.map { x =>  
-      (x.getLong(0), x) // account_id x row     
+
+    val homeLocationsRowsMap = homeLocations.map { x =>
+      (x.getLong(0), x) // account_id x row
     }.collect().toMap
-    
-    val homeLocationsKV = homeLocations.map { x =>  
+
+    val homeLocationsKV = homeLocations.map { x =>
       ("home::"+x.getLong(0),  x.getDouble(x.fieldIndex("latitude"))+":"+x.getDouble(x.fieldIndex("longitude"))   )  // home::account x location
     }
-    
+
     sc.toRedisKV(homeLocationsKV)
-    
+
     val homeLocationsKVMap = homeLocationsKV.collect().toMap
 
-    val trainSet = transactions.map { x => 
-    
+    val trainSet = transactions.map { x =>
+
       val customerId = x.getLong(x.fieldIndex("account_id"))
-            
+
       val transactionLocation = x.getString(x.fieldIndex("location"))
-      
+
       val homeLocation = homeLocationsRowsMap.get(customerId).get
-      
+
       val latitude = x.getDouble(x.fieldIndex("latitude"))
       val longitude = x.getDouble(x.fieldIndex("longitude"))
-      val homeLatitude = if (homeLocation.anyNull) latitude else homeLocation.fieldIndex("latitude") 
+      val homeLatitude = if (homeLocation.anyNull) latitude else homeLocation.fieldIndex("latitude")
       val homeLongitude = if (homeLocation.anyNull) longitude else homeLocation.fieldIndex("longitude")
-      
-      val distance = Util.calculateDistance(latitude, 
-                                            longitude, 
+
+      val distance = Util.calculateDistance(latitude,
+                                            longitude,
                                             homeLatitude,
-                                            homeLongitude                                         
+                                            homeLongitude
                                             )
-      
+
       val transactionValue = x.getAs[java.math.BigDecimal](x.fieldIndex("transaction_value"))
-      
+
       Vectors.dense(distance, transactionValue.doubleValue())
     }
-        
+
     val scaler = new StandardScaler().fit(trainSet)
 
     val kMeansModel = KMeans.train(
                       scaler.transform(trainSet), NUMBER_OF_CLUSTERS, 20)
 
-                      
-    return  kMeansModel.toPMML()
-    
-  
-    
-    
-  }
-    
 
-  
+    return  kMeansModel.toPMML()
+
+
+
+
+  }
+
+
+
 }
