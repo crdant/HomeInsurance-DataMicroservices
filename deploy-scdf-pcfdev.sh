@@ -5,6 +5,7 @@ cf dev trust
 security find-certificate -a -p /Users/crdant/Library/Keychains/pcfdev.keychain-db > dataflow_cert
 rm -f dataflow.truststore
 keytool -importcert -keystore dataflow.truststore -alias dataflow -storepass dataflow -file dataflow_cert -noprompt
+rm dataflow_cert
 
 cf login -a https://api.local.pcfdev.io -u admin -p admin -o pcfdev-org -s pcfdev-space --skip-ssl-validation
 cf create-org demos
