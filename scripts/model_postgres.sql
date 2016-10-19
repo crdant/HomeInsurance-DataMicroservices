@@ -22,3 +22,7 @@ CREATE TABLE ZIP_CODES
 COPY transaction FROM '/Users/crdant/Source/demos/FraudDetection-DataMicroservices/scripts/transaction.csv' DELIMITER ',' CSV HEADER;
 COPY zip_codes FROM '/Users/crdant/Source/demos/FraudDetection-DataMicroservices/scripts/zip_codes_states.csv' DELIMITER ',' CSV HEADER;
 COPY pos_device FROM '/Users/crdant/Source/demos/FraudDetection-DataMicroservices/scripts/pos_device.csv' DELIMITER ',' CSV HEADER;
+
+GRANT SELECT, INSERT, UPDATE, DELETE
+ON ALL TABLES IN SCHEMA public
+TO pivotal ;
