@@ -1,4 +1,4 @@
-fromgem = gemfire --region-name=Transaction --host-addresses=geode-server:10334 | enrich | log
+enrich = gemfire --region-name=Transaction --host-addresses=geode-server:10334 | enrich | log
 
 eval = :fromgem.enrich > pmml --modelLocation=http://clustering-service.local.pcfdev.io/clustering/model.pmml.xml --inputs='field_0=payload.distance.doubleValue(),field_1=payload.value.doubleValue()'  --inputType='application/x-spring-tuple' --outputType='application/json' | log
 
@@ -8,5 +8,4 @@ result = :eval.pmml > filter --expression=payload._output.result.toString().equa
 
 app import --uri file:////Users/fmelo/FraudDetection-DataMicroservices/scripts/scdf-stream-apps.properties --force
 
-app register --name enrich --type processor --uri maven://io.pivotal.demo:enricher-processor:1.0.0.BUILD-SNAPSHOT 
-
+app register --name enrich --type processor --uri maven://io.pivotal.demo:enricher-processor:1.0.0.BUILD-SNAPSHOT
