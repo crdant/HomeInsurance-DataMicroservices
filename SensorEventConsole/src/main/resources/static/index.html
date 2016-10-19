@@ -239,7 +239,7 @@ d3.select(self.frameElement).style("height", height + "px");
 
 
     var updateData = function() {
-			var riskTypes =[ "Thermostat", "Power", "CO Detector", "Smoke Detector"];
+			var riskTypes =[ "Thermostat", "Power", "CO Detector", "Smoke Detector", "Water", "Intruder", "Appliance"];
 			var levelColors =[ "yellow", "orange", "red"];
 
     	d3.json( "controller/getSensorEventsMap", function(data) {
