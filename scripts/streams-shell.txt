@@ -3,6 +3,6 @@ app register --name "enrich" --type processor --uri maven://io.pivotal.demo:enri
 stream create --name "enrich" --definition "load-events: gemfire --region-name=Transaction --host-addresses=host.pcfdev.io:10334 | enrich | log"
 stream create --name "rate" --definition ":enrich.enrich > rank-risk: pmml --modelLocation=http://clustering-service.local.pcfdev.io/clustering/model.pmml.xml --inputs='field_0=payload.distance.doubleValue(),field_1=payload.value.doubleValue()'  --inputType='application/x-spring-tuple' --outputType='application/json' | log"
 stream deploy enrich
-stream deploy eval
+stream deploy rate
 stream create --name "result" --definition ":rate.rank-risk > filter --expression=payload._output.result.toString().equals('2')  | store-risk: gemfire --region-name=Suspect --host-addresses=host.pcfdev.io:10334 --keyExpression=payload.id.toString()"
 stream deploy result
